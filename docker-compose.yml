@@ -1,0 +1,35 @@
+services:
+  backend:
+    build: .
+    env_file: .env
+    ports: ["8000:8000"]
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+    ports: ["3000:3000"]
+    depends_on: [backend]
+    restart: unless-stopped
+
+  # Optional: fully offline vector DB instead of Qdrant Cloud.
+  #   docker compose --profile local-qdrant up   (and set QDRANT_URL=http://qdrant:6333)
+  qdrant:
+    profiles: ["local-qdrant"]
+    image: qdrant/qdrant:latest
+    ports: ["6333:6333"]
+    volumes: ["qdrant_data:/qdrant/storage"]
+
+  # Optional: tertiary local LLM.
+  #   docker compose --profile local-llm up   (and set OLLAMA_BASE_URL=http://ollama:11434)
+  ollama:
+    profiles: ["local-llm"]
+    image: ollama/ollama:latest
+    ports: ["11434:11434"]
+    volumes: ["ollama_data:/root/.ollama"]
+
+volumes:
+  qdrant_data:
+  ollama_data:

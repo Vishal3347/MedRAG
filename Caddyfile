@@ -1,0 +1,13 @@
+{$DOMAIN} {
+	@api path /api/* /health /ready
+	handle @api {
+		# flush_interval -1: stream server-sent events immediately, never buffer the answer
+		reverse_proxy backend:8000 {
+			flush_interval -1
+		}
+	}
+	handle {
+		encode zstd gzip
+		reverse_proxy frontend:3000
+	}
+}

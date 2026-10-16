@@ -1,0 +1,32 @@
+# One VM, one domain: Caddy terminates HTTPS and routes /api/*, /health, /ready to the API and everything else to the UI.
+# Run:  docker compose -f docker-compose.oracle.yml up -d --build      (needs DOMAIN=... in .env)
+services:
+  backend:
+    build: .
+    env_file: .env
+    restart: unless-stopped
+    expose: ["8000"]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: https://${DOMAIN:?set DOMAIN in .env}
+    restart: unless-stopped
+    expose: ["3000"]
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [backend, frontend]
+
+volumes:
+  caddy_data:
+  caddy_config:

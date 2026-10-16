@@ -1,0 +1,31 @@
+# Render Blueprint: New > Blueprint > pick this repo. Fill the secret values in the dashboard when prompted.
+services:
+  - type: web
+    name: medrag-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CORS_ORIGINS        # your Vercel URL, e.g. https://medrag.vercel.app (no trailing slash)
+        sync: false
+      - key: QDRANT_COLLECTION
+        value: medical_textbook
+      - key: LLM_CHAIN
+        value: groq:openai/gpt-oss-120b,groq:openai/gpt-oss-20b,gemini:gemini-3.8-flash
+      - key: EMBEDDING_BACKEND
+        value: fastembed
+      - key: TRUST_PROXY
+        value: "true"
+      - key: LOG_JSON
+        value: "true"
